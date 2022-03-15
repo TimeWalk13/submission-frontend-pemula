@@ -40,9 +40,9 @@ function tambahBuku() {
 }
 
 function temukanId(id){
-    for(let i=0; i<rakBuku.length; i++){
-        if(rakBuku[i].id === id){
-            return rakBuku[i].id
+    for(index in rakBuku){
+        if(rakBuku[index].id === id){
+            return index;
         }
     }
 
@@ -52,10 +52,40 @@ function temukanId(id){
 function deleteBuku(idBuku){
     const ID_BUKU = temukanId(idBuku);
     console.log(ID_BUKU)
-    rakBuku.splice(ID_BUKU, 1)
+    rakBuku.splice(ID_BUKU, 1);
+    console.log(rakBuku)
 
     document.dispatchEvent(new Event(showBook));
     simpanData()
+}
+
+
+function selesai(id){
+    let book;
+
+    for(let i=0; i < rakBuku.length; i++){
+        if(rakBuku[i].id === id){
+            book = rakBuku[i]
+        }
+    }
+    
+    book.complete = true;
+    document.dispatchEvent(new Event(showBook));
+    simpanData();
+}
+
+function blmSelesai(id){
+    let book;
+
+    for(let i=0; i < rakBuku.length; i++){
+        if(rakBuku[i].id === id){
+            book = rakBuku[i]
+        }
+    }
+    
+    book.complete = false;
+    document.dispatchEvent(new Event(showBook));
+    simpanData();
 }
 
 function buatBuku(book){
@@ -85,7 +115,13 @@ function buatBuku(book){
     p2.innerText = `Tahun: ${book.terbit}`;
     if(book.complete){
         btnSelesi.innerText = 'Belum Selesai Dibaca';
+        btnSelesi.addEventListener('click', function(){
+            blmSelesai(book.id)
+        })
     }else{
+        btnSelesi.addEventListener('click', function(){
+            selesai(book.id)
+        })
         btnSelesi.innerText = 'Selesai Dibaca';
     }
     btnHapus.innerText = 'Hapus buku';
@@ -113,6 +149,7 @@ function tampilkanBuku(){
     document.dispatchEvent(new Event(showBook))
     simpanData()
 }
+
 
 buttonSubmit.addEventListener("click", function(event){
     event.preventDefault();
