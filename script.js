@@ -1,5 +1,6 @@
 let rakBuku = [];
-const bookShelfElement = document.querySelector('.book_shelf');
+
+const buttonSubmit = document.querySelector('#bookSubmit');
 const showBook = "showbook";
 
 function cariIdBuku(id){
@@ -15,21 +16,14 @@ function simpanData(){
     localStorage.setItem('Buku', booksLocalstorage);
 }
 
-function hapusBuku(id){
-    let bookId = cariIdBuku(id);
-    rakBuku.splice(bookId, 1);
-
-    document.dispatchEvent(new Event(showBook));
-    simpanData()
-}
-
 function tambahBuku() {
     const judul = document.getElementById("inputBookTitle").value;
     const author = document.getElementById("inputBookAuthor").value;
     const terbit = document.getElementById("inputBookYear").value;
-    const complete = document.getElementById("inputBookIsComplete").value;
+    const complete = document.getElementById("inputBookIsComplete").checked;
     
     const buku = {
+        id: +new Date(),
         judul,
         author,
         terbit,
@@ -38,12 +32,33 @@ function tambahBuku() {
 
     rakBuku = JSON.parse(localStorage.getItem('Buku')) ? JSON.parse(localStorage.getItem('Buku')):[];
     rakBuku.push(buku);
+
     localStorage.setItem("Buku",JSON.stringify(rakBuku));
 
     document.dispatchEvent(new Event(showBook));
+    simpanData()
 }
 
-function tampilkanBuku(book){
+function temukanId(id){
+    for(let i=0; i<rakBuku.length; i++){
+        if(rakBuku[i].id === id){
+            return rakBuku[i].id
+        }
+    }
+
+    return -1;
+}
+
+function deleteBuku(idBuku){
+    const ID_BUKU = temukanId(idBuku);
+    console.log(ID_BUKU)
+    rakBuku.splice(ID_BUKU, 1)
+
+    document.dispatchEvent(new Event(showBook));
+    simpanData()
+}
+
+function buatBuku(book){
     const divElement = document.createElement('div');
     const articleElement = document.createElement('article');
     const h3Element = document.createElement('h3');
@@ -61,14 +76,19 @@ function tampilkanBuku(book){
     btnSelesi.setAttribute('class','green');
     btnHapus.setAttribute('class','red');
 
+    btnHapus.addEventListener('click', function(e){
+        deleteBuku(book.id)
+    })
+
     h3Element.innerText = book.judul;
     p1.innerText = `Penulis: ${book.author}`;
     p2.innerText = `Tahun: ${book.terbit}`;
-    btnSelesi.innerText = 'Selesai Dibaca';
+    if(book.complete){
+        btnSelesi.innerText = 'Belum Selesai Dibaca';
+    }else{
+        btnSelesi.innerText = 'Selesai Dibaca';
+    }
     btnHapus.innerText = 'Hapus buku';
-    btnHapus.addEventListener('click', function(event){
-        hapusBuku(book.id)
-    })
 
     divAction.appendChild(btnSelesi);
     divAction.appendChild(btnHapus);
@@ -79,36 +99,42 @@ function tampilkanBuku(book){
     articleElement.appendChild(divAction);
 
     divElement.appendChild(articleElement);
-    bookShelfElement.appendChild(divElement)
+
+    return divElement;
 
 }
 
-const buttonSubmit = document.getElementById("bookSubmit");
+function tampilkanBuku(){
+    let books = localStorage.getItem('Buku');
+    books = JSON.parse(books);
+    console.log(books)
+    rakBuku = books
+
+    document.dispatchEvent(new Event(showBook))
+    simpanData()
+}
+
 buttonSubmit.addEventListener("click", function(event){
     event.preventDefault();
     tambahBuku();
 })
 
 document.addEventListener("DOMContentLoaded", function(){
-    const bukuuu = localStorage.getItem('Buku');
-    if(bukuuu){
-        const bukuFromLS = JSON.parse(bukuuu);
-    
-        for(let book of bukuFromLS){
-            tampilkanBuku(book)
-        }
-    }
+    tampilkanBuku()
 })
 
 document.addEventListener(showBook, function(){
-    const bukuuu = localStorage.getItem('Buku');
-    if(bukuuu){
-        const bukuFromLS = JSON.parse(bukuuu);
-    
-        for(let book of bukuFromLS){
-            tampilkanBuku(book)
+    document.getElementById('blm-selesai').innerHTML = '<h2>Belum Selesai</h2>';
+    document.getElementById('selesai').innerHTML = '<h2>Sudah Selesai</h2>';
+
+    for(let i=0; i < rakBuku.length; i++){
+        if(rakBuku[i].complete){
+            document.getElementById('selesai').append(buatBuku(rakBuku[i]));
+        }else{
+            document.getElementById('blm-selesai').append(buatBuku(rakBuku[i]));
         }
     }
+    
 })
 
 
